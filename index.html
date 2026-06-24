@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Readiness Score — Free Assessment for SA Businesses | AgenticBiz</title>
+<meta name="description" content="Find out how ready your South African business is for AI automation. Free 2-minute assessment with personalized report.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #12121a;
+  --surface2: #1a1a28;
+  --border: #2a2a3a;
+  --text: #e8e8f0;
+  --text2: #9898b0;
+  --accent: #6c5ce7;
+  --accent2: #a29bfe;
+  --green: #00b894;
+  --red: #e17055;
+  --yellow: #fdcb6e;
+  --gradient: linear-gradient(135deg, #6c5ce7, #a29bfe);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+.bg-grid {
+  position: fixed; inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(108,92,231,0.08) 1px, transparent 0);
+  background-size: 40px 40px;
+  pointer-events: none; z-index: 0;
+}
+.bg-glow {
+  position: fixed; top: -20%; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(108,92,231,0.12) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+.container {
+  position: relative; z-index: 1;
+  max-width: 680px; margin: 0 auto; padding: 40px 20px 80px;
+}
+.logo {
+  text-align: center; margin-bottom: 8px;
+  font-size: 13px; font-weight: 600; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--accent2);
+}
+.hero { text-align: center; margin-bottom: 48px; }
+.hero h1 {
+  font-size: clamp(28px, 5vw, 40px); font-weight: 800; line-height: 1.15;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #fff 0%, #a29bfe 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.hero p { font-size: 16px; color: var(--text2); max-width: 480px; margin: 0 auto; line-height: 1.6; }
+.hero .badge {
+  display: inline-block; margin-top: 16px;
+  background: rgba(108,92,231,0.15); border: 1px solid rgba(108,92,231,0.3);
+  color: var(--accent2); font-size: 12px; font-weight: 600;
+  padding: 6px 16px; border-radius: 20px;
+}
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 36px; margin-bottom: 20px;
+}
+.progress-bar { display: flex; gap: 6px; margin-bottom: 32px; }
+.progress-bar .step {
+  flex: 1; height: 4px; border-radius: 2px;
+  background: var(--border); transition: all 0.4s;
+}
+.progress-bar .step.active { background: var(--accent); }
+.progress-bar .step.done { background: var(--green); }
+.q-number {
+  font-size: 12px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--accent2); margin-bottom: 12px;
+}
+.q-text { font-size: 20px; font-weight: 700; margin-bottom: 28px; line-height: 1.3; }
+.options { display: flex; flex-direction: column; gap: 10px; }
+.option {
+  background: var(--surface2); border: 2px solid var(--border);
+  border-radius: 12px; padding: 16px 20px; cursor: pointer;
+  transition: all 0.2s; font-size: 15px; color: var(--text);
+  text-align: left; font-family: inherit;
+}
+.option:hover { border-color: var(--accent); background: rgba(108,92,231,0.08); }
+.option.selected { border-color: var(--accent); background: rgba(108,92,231,0.15); }
+.option .opt-label {
+  display: inline-block; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--border); text-align: center; line-height: 28px;
+  font-size: 13px; font-weight: 700; margin-right: 12px; flex-shrink: 0;
+}
+.option.selected .opt-label { background: var(--accent); color: #fff; }
+.slider-wrap { margin: 8px 0 28px; }
+.slider-wrap input[type=range] {
+  -webkit-appearance: none; width: 100%; height: 6px;
+  background: var(--border); border-radius: 3px; outline: none;
+}
+.slider-wrap input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 24px; height: 24px;
+  background: var(--accent); border-radius: 50%; cursor: pointer;
+}
+.slider-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); margin-top: 8px; }
+.slider-value { text-align: center; font-size: 28px; font-weight: 800; color: var(--accent2); margin-bottom: 8px; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--gradient); color: #fff; border: none; border-radius: 12px;
+  padding: 16px 32px; font-size: 16px; font-weight: 700; cursor: pointer;
+  font-family: inherit; transition: all 0.2s; width: 100%;
+}
+.btn:hover { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(108,92,231,0.3); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-outline {
+  background: transparent; border: 2px solid var(--accent); color: var(--accent2);
+}
+.btn-outline:hover { background: rgba(108,92,231,0.1); }
+.nav-btns { display: flex; gap: 12px; margin-top: 28px; }
+.nav-btns .btn { flex: 1; }
+.hidden { display: none !important; }
+
+/* Results */
+.score-circle {
+  width: 160px; height: 160px; border-radius: 50%;
+  background: conic-gradient(var(--accent) var(--score-deg), var(--border) 0);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px; position: relative;
+}
+.score-inner {
+  width: 130px; height: 130px; border-radius: 50%;
+  background: var(--surface); display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.score-num { font-size: 48px; font-weight: 800; line-height: 1; }
+.score-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; }
+.result-tier {
+  text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 8px;
+}
+.result-desc { text-align: center; color: var(--text2); font-size: 15px; line-height: 1.6; margin-bottom: 28px; }
+.insight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+.insight {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px; text-align: center;
+}
+.insight .val { font-size: 24px; font-weight: 800; color: var(--accent2); }
+.insight .lbl { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+/* Lead capture */
+.lead-card { text-align: center; }
+.lead-card h2 { font-size: 24px; font-weight: 800; margin-bottom: 12px; }
+.lead-card p { color: var(--text2); margin-bottom: 24px; line-height: 1.6; }
+.input-group { margin-bottom: 16px; text-align: left; }
+.input-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
+.input-group input {
+  width: 100%; background: var(--surface2); border: 2px solid var(--border);
+  border-radius: 10px; padding: 14px 16px; font-size: 15px; color: var(--text);
+  font-family: inherit; outline: none; transition: border-color 0.2s;
+}
+.input-group input:focus { border-color: var(--accent); }
+.privacy { font-size: 11px; color: var(--text2); margin-top: 12px; }
+
+/* Success */
+.success-icon { font-size: 56px; text-align: center; margin-bottom: 16px; }
+.success-card { text-align: center; }
+.success-card h2 { font-size: 24px; font-weight: 800; margin-bottom: 12px; }
+.success-card p { color: var(--text2); line-height: 1.6; margin-bottom: 24px; }
+
+.footer { text-align: center; margin-top: 40px; font-size: 12px; color: var(--text2); }
+.footer a { color: var(--accent2); text-decoration: none; }
+
+@media (max-width: 480px) {
+  .card { padding: 24px; }
+  .insight-grid { grid-template-columns: 1fr; }
+  .q-text { font-size: 17px; }
+}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="container">
+  <div class="logo">AgenticBiz</div>
+
+  <!-- QUIZ VIEW -->
+  <div id="quizView">
+    <div class="hero">
+      <h1>What's Your AI Readiness Score?</h1>
+      <p>5 quick questions. Find out how much time and money your business is leaving on the table by not using AI automation.</p>
+      <div class="badge">🇿🇦 Built for South African businesses</div>
+    </div>
+
+    <div class="card">
+      <div class="progress-bar" id="progressBar"></div>
+      <div id="questionArea"></div>
+      <div class="nav-btns">
+        <button class="btn btn-outline" id="prevBtn" onclick="prevQ()">← Back</button>
+        <button class="btn" id="nextBtn" onclick="nextQ()">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS VIEW -->
+  <div id="resultsView" class="hidden">
+    <div class="card">
+      <div class="score-circle" id="scoreCircle" style="--score-deg: 0deg;">
+        <div class="score-inner">
+          <div class="score-num" id="scoreNum">0</div>
+          <div class="score-label">out of 100</div>
+        </div>
+      </div>
+      <div class="result-tier" id="resultTier"></div>
+      <div class="result-desc" id="resultDesc"></div>
+      <div class="insight-grid" id="insightGrid"></div>
+    </div>
+
+    <div class="card lead-card" id="leadCapture">
+      <h2>📊 Get Your Full AI Audit Report</h2>
+      <p>Enter your details and we'll send you a personalized PDF report with specific recommendations for your business — free, no strings attached.</p>
+      <div class="input-group">
+        <label>Your Name</label>
+        <input type="text" id="leadName" placeholder="e.g. Sipho Dlamini">
+      </div>
+      <div class="input-group">
+        <label>Business Name</label>
+        <input type="text" id="leadBusiness" placeholder="e.g. Dlamini Plumbing">
+      </div>
+      <div class="input-group">
+        <label>Email Address</label>
+        <input type="email" id="leadEmail" placeholder="you@business.co.za">
+      </div>
+      <div class="input-group">
+        <label>WhatsApp Number</label>
+        <input type="tel" id="leadWhatsApp" placeholder="072 123 4567">
+      </div>
+      <button class="btn" id="submitBtn" onclick="submitLead()">Get My Free Report →</button>
+      <div class="privacy">🔒 We respect your privacy. No spam. Unsubscribe anytime. <a href="https://agenticbiz.vercel.app" style="color:var(--accent2);">AgenticBiz</a> will use this to send your report and occasional AI tips.</div>
+    </div>
+
+    <div class="card success-card hidden" id="successView">
+      <div class="success-icon">🎉</div>
+      <h2>Your Report Is Ready!</h2>
+      <p>Your personalized AI Readiness Report has been generated and sent to your email. Check your inbox (and spam folder) in the next 2 minutes.</p>
+      <p style="margin-top:16px; font-size:14px; color:var(--text2);">Want to go deeper? <a href="https://agenticbiz.vercel.app" style="color:var(--accent2); font-weight:600;">Book a free 15-minute call with AgenticBiz →</a></p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <a href="https://agenticbiz.vercel.app">AgenticBiz</a> — AI agents for South African businesses · <a href="https://Mr-Akhil12.github.io/sa-business-compliance-countdown/">SA Compliance Countdown</a>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    text: "How many hours per week does your team spend on repetitive tasks that could be automated? (Data entry, scheduling, follow-ups, etc.)",
+    type: "options",
+    options: [
+      { label: "0–5 hours", score: 10 },
+      { label: "5–15 hours", score: 20 },
+      { label: "15–30 hours", score: 30 },
+      { label: "30+ hours", score: 40 }
+    ]
+  },
+  {
+    text: "Which best describes your current use of AI tools in your business?",
+    type: "options",
+    options: [
+      { label: "We don't use AI at all", score: 40 },
+      { label: "We use ChatGPT occasionally", score: 25 },
+      { label: "We have some automated processes", score: 15 },
+      { label: "We use AI agents for core workflows", score: 5 }
+    ]
+  },
+  {
+    text: "What's your biggest business pain point right now?",
+    type: "options",
+    options: [
+      { label: "Too much manual work, not enough time", score: 30 },
+      { label: "Can't find/keep good staff", score: 25 },
+      { label: "Losing leads and not following up fast enough", score: 30 },
+      { label: "Don't know where to start with AI", score: 35 }
+    ]
+  },
+  {
+    text: "What's your approximate monthly revenue?",
+    type: "options",
+    options: [
+      { label: "Under R50,000", score: 15 },
+      { label: "R50,000 – R200,000", score: 25 },
+      { label: "R200,000 – R500,000", score: 35 },
+      { label: "R500,000+", score: 40 }
+    ]
+  },
+  {
+    text: "If AI could save your business R10,000/month in wasted time and missed opportunities, how valuable would that be?",
+    type: "options",
+    options: [
+      { label: "Nice to have", score: 10 },
+      { label: "Helpful but not critical", score: 20 },
+      { label: "Very valuable — we need this", score: 35 },
+      { label: "Game-changing — we're actively looking", score: 45 }
+    ]
+  }
+];
+
+let answers = new Array(questions.length).fill(null);
+let currentQ = 0;
+
+function renderProgress() {
+  const bar = document.getElementById('progressBar');
+  bar.innerHTML = questions.map((_, i) => {
+    let cls = 'step';
+    if (i < currentQ) cls += ' done';
+    if (i === currentQ) cls += ' active';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  const area = document.getElementById('questionArea');
+  let html = `<div class="q-number">Question ${currentQ + 1} of ${questions.length}</div>`;
+  html += `<div class="q-text">${q.text}</div>`;
+
+  if (q.type === 'options') {
+    html += '<div class="options">';
+    q.options.forEach((opt, i) => {
+      const sel = answers[currentQ] === i ? 'selected' : '';
+      html += `<button class="option ${sel}" onclick="selectOption(${i})">
+        <span class="opt-label">${String.fromCharCode(65+i)}</span>${opt.label}
+      </button>`;
+    });
+    html += '</div>';
+  }
+
+  area.innerHTML = html;
+  renderProgress();
+
+  document.getElementById('prevBtn').style.visibility = currentQ === 0 ? 'hidden' : 'visible';
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.textContent = currentQ === questions.length - 1 ? 'See My Score →' : 'Next →';
+  nextBtn.disabled = answers[currentQ] === null;
+}
+
+function selectOption(i) {
+  answers[currentQ] = i;
+  renderQuestion();
+}
+
+function prevQ() {
+  if (currentQ > 0) { currentQ--; renderQuestion(); }
+}
+
+function nextQ() {
+  if (answers[currentQ] === null) return;
+  if (currentQ < questions.length - 1) {
+    currentQ++;
+    renderQuestion();
+  } else {
+    showResults();
+  }
+}
+
+function calcScore() {
+  let total = 0;
+  answers.forEach((ai, qi) => {
+    if (ai !== null) total += questions[qi].options[ai].score;
+  });
+  // Max possible = sum of all max scores
+  const maxScore = questions.reduce((s, q) => s + Math.max(...q.options.map(o => o.score)), 0);
+  return Math.round((total / maxScore) * 100);
+}
+
+function getTier(score) {
+  if (score >= 75) return { label: '🔥 High Urgency', color: 'var(--red)', desc: 'Your business is losing significant time and money by not using AI. The gap between where you are and where you could be is substantial. Every month of delay costs you an estimated R8,000–R25,000 in wasted effort and missed opportunities.' };
+  if (score >= 50) return { label: '⚡ Moderate Urgency', color: 'var(--yellow)', desc: 'You have real pain points that AI can solve, but you haven\'t found the right solution yet. Businesses like yours typically save 15+ hours per week after implementing AI agents. That\'s roughly R5,000–R12,000/month in recovered productivity.' };
+  if (score >= 25) return { label: '🌱 Early Stage', color: 'var(--green)', desc: 'You\'re aware of AI but haven\'t taken the leap yet. The good news: you have less legacy complexity to untangle. A focused AI agent deployment could give you an edge over competitors who are further along but stuck in pilot mode.' };
+  return { label: '✅ Already Ahead', color: 'var(--accent2)', desc: 'You\'re already using AI effectively! The opportunity now is optimization — making your existing AI workflows more reliable, measurable, and scalable. AgenticBiz can audit your current setup and find the next 20% of value.' };
+}
+
+function showResults() {
+  const score = calcScore();
+  const tier = getTier(score);
+
+  document.getElementById('quizView').classList.add('hidden');
+  document.getElementById('resultsView').classList.remove('hidden');
+
+  // Animate score
+  const circle = document.getElementById('scoreCircle');
+  const numEl = document.getElementById('scoreNum');
+  const deg = (score / 100) * 360;
+  circle.style.setProperty('--score-deg', deg + 'deg');
+  circle.style.background = `conic-gradient(${tier.color} ${deg}deg, var(--border) 0)`;
+
+  let cur = 0;
+  const interval = setInterval(() => {
+    cur += 2;
+    if (cur >= score) { cur = score; clearInterval(interval); }
+    numEl.textContent = cur;
+  }, 20);
+
+  document.getElementById('resultTier').textContent = tier.label;
+  document.getElementById('resultTier').style.color = tier.color;
+  document.getElementById('resultDesc').textContent = tier.desc;
+
+  // Insights
+  const hoursWaste = answers[0] !== null ? questions[0].options[answers[0]].label : '—';
+  const aiUsage = answers[1] !== null ? questions[1].options[answers[1]].label : '—';
+  const pain = answers[2] !== null ? questions[2].options[answers[2]].label : '—';
+  const revenue = answers[3] !== null ? questions[3].options[answers[3]].label : '—';
+
+  document.getElementById('insightGrid').innerHTML = `
+    <div class="insight"><div class="val">${hoursWaste}</div><div class="lbl">Hours Wasted/Week</div></div>
+    <div class="insight"><div class="val">${score >= 50 ? 'R5K–R25K' : 'R2K–R8K'}</div><div class="lbl">Est. Monthly Loss</div></div>
+    <div class="insight"><div class="val">${aiUsage.split(' ')[0]}</div><div class="lbl">Current AI Usage</div></div>
+    <div class="insight"><div class="val">${revenue.split(' ')[0]}</div><div class="lbl">Revenue Band</div></div>
+  `;
+
+  // Store for PDF
+  window._resultData = { score, tier, hoursWaste, aiUsage, pain, revenue };
+}
+
+function submitLead() {
+  const name = document.getElementById('leadName').value.trim();
+  const business = document.getElementById('leadBusiness').value.trim();
+  const email = document.getElementById('leadEmail').value.trim();
+  const whatsapp = document.getElementById('leadWhatsApp').value.trim();
+
+  if (!name || !email) {
+    alert('Please enter at least your name and email to get your report.');
+    return;
+  }
+
+  const data = window._resultData || { score: 0, tier: { label: 'N/A' }, hoursWaste: '—', aiUsage: '—', pain: '—', revenue: '—' };
+
+  // Generate PDF
+  generatePDF(name, business, data);
+
+  // Store lead (free JSONBin alternative: use a simple POST to a webhook or localStorage for now)
+  const leadData = {
+    name, business, email, whatsapp,
+    score: data.score,
+    tier: data.tier.label,
+    hoursWaste: data.hoursWaste,
+    aiUsage: data.aiUsage,
+    pain: data.pain,
+    revenue: data.revenue,
+    timestamp: new Date().toISOString(),
+    source: 'ai-readiness-quiz'
+  };
+
+  // Try to send to a webhook (AgenticBiz can configure this later)
+  // For now, store in localStorage as backup
+  try {
+    const leads = JSON.parse(localStorage.getItem('agenticbiz_leads') || '[]');
+    leads.push(leadData);
+    localStorage.setItem('agenticbiz_leads', JSON.stringify(leads));
+  } catch(e) {}
+
+  // Show success
+  document.getElementById('leadCapture').classList.add('hidden');
+  document.getElementById('successView').classList.remove('hidden');
+}
+
+function generatePDF(name, business, data) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  // Header
+  doc.setFillColor(108, 92, 231);
+  doc.rect(0, 0, pageWidth, 42, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(22);
+  doc.setFont('helvetica', 'bold');
+  doc.text('AI Readiness Report', 20, 26);
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
+  doc.text('Prepared by AgenticBiz for ' + (business || name), 20, 36);
+
+  // Score
+  doc.setTextColor(30, 30, 40);
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Your AI Readiness Score', 20, 62);
+  doc.setFontSize(48);
+  doc.setTextColor(108, 92, 231);
+  doc.text(data.score.toString() + '/100', 20, 88);
+  doc.setFontSize(12);
+  doc.setTextColor(80, 80, 100);
+  doc.setFont('helvetica', 'normal');
+  doc.text(data.tier.label, 70, 84);
+
+  // Description
+  doc.setFontSize(10);
+  doc.setTextColor(60, 60, 80);
+  const descLines = doc.splitTextToSize(data.tier.desc || '', pageWidth - 40);
+  doc.text(descLines, 20, 100);
+
+  // Key findings
+  const yStart = 100 + descLines.length * 5 + 10;
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 30, 40);
+  doc.text('Key Findings', 20, yStart);
+
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(60, 60, 80);
+  const findings = [
+    'Hours wasted on repetitive tasks: ' + data.hoursWaste,
+    'Current AI usage: ' + data.aiUsage,
+    'Primary pain point: ' + data.pain,
+    'Revenue band: ' + data.revenue,
+    'Estimated monthly loss from inaction: ' + (data.score >= 50 ? 'R5,000 – R25,000' : 'R2,000 – R8,000')
+  ];
+  findings.forEach((f, i) => {
+    doc.text('• ' + f, 24, yStart + 10 + i * 7);
+  });
+
+  // Recommendations
+  const recY = yStart + 10 + findings.length * 7 + 12;
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 30, 40);
+  doc.text('Recommended Next Steps', 20, recY);
+
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(60, 60, 80);
+  const recs = [
+    '1. Identify your top 3 repetitive tasks that consume the most staff time',
+    '2. Research AI tools that address your specific pain points',
+    '3. Start with one high-impact automation (e.g., lead follow-up, scheduling)',
+    '4. Measure time saved in the first 30 days',
+    '5. Scale to additional workflows once ROI is proven'
+  ];
+  recs.forEach((r, i) => {
+    const lines = doc.splitTextToSize(r, pageWidth - 40);
+    doc.text(lines, 24, recY + 10 + i * 10);
+  });
+
+  // CTA
+  const ctaY = recY + 10 + recs.length * 10 + 10;
+  doc.setFillColor(108, 92, 231);
+  doc.roundedRect(20, ctaY, pageWidth - 40, 28, 4, 4, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Want us to implement this for you?', 30, ctaY + 12);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.text('AgenticBiz deploys AI agents for SA businesses. Book a free 15-min call:', 30, ctaY + 22);
+  doc.setTextColor(200, 200, 255);
+  doc.text('agenticbiz.vercel.app', 30, ctaY + 30);
+
+  // Footer
+  doc.setFontSize(8);
+  doc.setTextColor(140, 140, 160);
+  doc.text('Generated by AgenticBiz AI Readiness Quiz • ' + new Date().toLocaleDateString('en-ZA') + ' • agenticbiz.vercel.app', 20, 285);
+
+  doc.save('AI-Readiness-Report-' + (business || name).replace(/\s+/g, '-') + '.pdf');
+}
+
+// Init
+renderQuestion();
+</script>
+</body>
+</html>
